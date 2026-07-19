@@ -29,6 +29,9 @@ export class AppComponent implements OnInit, OnDestroy {
   // Language State (Default TH)
   lang: 'TH' | 'EN' = 'TH';
 
+  // Theme State (Default Light)
+  theme: 'light' | 'dark' = 'light';
+
   // API Live Status
   apiOnline = false;
   apiHealth: HealthResponse | null = null;
@@ -62,7 +65,7 @@ export class AppComponent implements OnInit, OnDestroy {
   contactSuccessMessage = '';
   contactErrorMessage = '';
 
-  // Dictionary UI Static Texts (Formal, Clean, High Readability)
+  // Dictionary UI Static Texts
   dict = {
     TH: {
       navAbout: 'เกี่ยวกับผม',
@@ -74,6 +77,8 @@ export class AppComponent implements OnInit, OnDestroy {
       navContact: 'ติดต่อ',
       apiOnline: 'ระบบออนไลน์',
       apiOffline: 'ระบบออฟไลน์',
+      themeLight: '☀️ สว่าง',
+      themeDark: '🌙 มืด',
       heroBadge: 'เว็บไซต์อย่างเป็นทางการ',
       heroTitle1: 'พุฒิพงศ์ ราชรักษ์',
       heroTitle2: 'วิศวกรซอฟต์แวร์ & นักพัฒนาเว็บแบบ Full-Stack',
@@ -134,6 +139,8 @@ export class AppComponent implements OnInit, OnDestroy {
       navContact: 'Contact',
       apiOnline: 'System Online',
       apiOffline: 'System Offline',
+      themeLight: '☀️ Light',
+      themeDark: '🌙 Dark',
       heroBadge: 'Official Website',
       heroTitle1: 'Phuttiphong Ratcharak',
       heroTitle2: 'Software Engineer & Full-Stack Developer',
@@ -189,12 +196,20 @@ export class AppComponent implements OnInit, OnDestroy {
   constructor(private apiService: ApiService) {}
 
   ngOnInit(): void {
+    // Load saved language
     if (typeof localStorage !== 'undefined') {
       const savedLang = localStorage.getItem('nexus_lang') as 'TH' | 'EN';
       if (savedLang === 'TH' || savedLang === 'EN') {
         this.lang = savedLang;
       }
+
+      // Load saved theme
+      const savedTheme = localStorage.getItem('nexus_theme') as 'light' | 'dark';
+      if (savedTheme === 'light' || savedTheme === 'dark') {
+        this.theme = savedTheme;
+      }
     }
+    this.applyTheme();
 
     this.checkHealth();
     this.healthSub = interval(10000).subscribe(() => this.checkHealth());
@@ -211,6 +226,20 @@ export class AppComponent implements OnInit, OnDestroy {
     this.lang = this.lang === 'TH' ? 'EN' : 'TH';
     if (typeof localStorage !== 'undefined') {
       localStorage.setItem('nexus_lang', this.lang);
+    }
+  }
+
+  toggleTheme(): void {
+    this.theme = this.theme === 'light' ? 'dark' : 'light';
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem('nexus_theme', this.theme);
+    }
+    this.applyTheme();
+  }
+
+  private applyTheme(): void {
+    if (typeof document !== 'undefined') {
+      document.body.setAttribute('data-theme', this.theme);
     }
   }
 

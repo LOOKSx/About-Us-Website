@@ -22,6 +22,12 @@
     </nav>
 
     <div class="nav-actions">
+      <!-- Theme Switcher Pill -->
+      <button class="theme-toggle-btn" (click)="toggleTheme()" title="Switch Theme Color (Light / Dark)">
+        <span>{{ theme === 'light' ? '🌙' : '☀️' }}</span>
+        <span class="theme-label">{{ theme === 'light' ? (dict[lang].themeDark) : (dict[lang].themeLight) }}</span>
+      </button>
+
       <!-- Simple Clean Language Toggle -->
       <button class="lang-toggle-btn" (click)="toggleLang()" title="Toggle Language">
         <span>{{ lang === 'TH' ? '🇹🇭 TH' : '🇬🇧 EN' }}</span>
@@ -36,6 +42,12 @@
 
   <!-- Mobile Drawer Menu -->
   <div class="mobile-drawer glass-panel" [class.open]="mobileMenuOpen">
+    <div class="mobile-drawer-header">
+      <span>🎨 {{ lang === 'TH' ? 'ปรับสีเว็บ:' : 'Theme:' }}</span>
+      <button class="theme-toggle-btn sm" (click)="toggleTheme()">
+        <span>{{ theme === 'light' ? '🌙 โหมดมืด' : '☀️ โหมดสว่าง' }}</span>
+      </button>
+    </div>
     <div class="mobile-drawer-header">
       <span>🌐 {{ lang === 'TH' ? 'เลือกภาษา:' : 'Language:' }}</span>
       <button class="lang-toggle-btn sm" (click)="toggleLang()">
