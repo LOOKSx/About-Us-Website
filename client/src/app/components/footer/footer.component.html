@@ -1,0 +1,20 @@
+<footer class="footer">
+  <div class="container footer-container">
+    <div class="footer-brand">
+      <div class="brand-name">{{ lang === 'TH' ? (profile?.name_th || profile?.name) : profile?.name }}</div>
+      <p>{{ dict.footerSub }}</p>
+    </div>
+
+    <div class="footer-links">
+      <a href="#about">{{ dict.navAbout }}</a>
+      <a href="#skills">{{ dict.navSkills }}</a>
+      <a href="#projects">{{ dict.navProjects }}</a>
+      <a href="#journey">{{ dict.navJourney }}</a>
+      <a href="#faq">{{ dict.navFaq }}</a>
+    </div>
+
+    <div class="footer-copyright">
+      {{ dict.footerRights }}
+    </div>
+  </div>
+</footer>

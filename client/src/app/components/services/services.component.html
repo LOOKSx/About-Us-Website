@@ -1,0 +1,30 @@
+<section id="services" class="section-padding services-section">
+  <div class="container">
+    <div class="section-header">
+      <div class="badge">{{ dict.servicesBadge }}</div>
+      <h2 class="section-title">{{ dict.servicesTitle }}</h2>
+      <p class="section-subtitle">{{ dict.servicesSub }}</p>
+    </div>
+
+    <div class="services-grid">
+      <div class="service-card glass-panel" *ngFor="let srv of services">
+        <div class="service-icon">{{ srv.icon }}</div>
+        <span class="service-category">{{ srv.category }}</span>
+        <h3>{{ lang === 'TH' ? (srv.title_th || srv.title) : srv.title }}</h3>
+        <p>{{ lang === 'TH' ? (srv.description_th || srv.description) : srv.description }}</p>
+        <ul class="highlights-list">
+          <ng-container *ngIf="lang === 'TH' && srv.highlights_th">
+            <li *ngFor="let h of srv.highlights_th">
+              <span class="check-icon">✓</span> {{ h }}
+            </li>
+          </ng-container>
+          <ng-container *ngIf="lang !== 'TH' || !srv.highlights_th">
+            <li *ngFor="let h of srv.highlights">
+              <span class="check-icon">✓</span> {{ h }}
+            </li>
+          </ng-container>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>

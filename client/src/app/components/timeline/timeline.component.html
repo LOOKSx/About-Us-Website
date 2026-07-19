@@ -1,0 +1,25 @@
+<section id="journey" class="section-padding timeline-section">
+  <div class="container">
+    <div class="section-header">
+      <div class="badge">{{ dict.journeyBadge }}</div>
+      <h2 class="section-title">{{ dict.journeyTitle }}</h2>
+      <p class="section-subtitle">{{ dict.journeySub }}</p>
+    </div>
+
+    <div class="timeline-container">
+      <div class="timeline-item" *ngFor="let item of timeline">
+        <div class="timeline-marker">
+          <span>{{ item.icon }}</span>
+        </div>
+        <div class="timeline-content glass-panel">
+          <div class="timeline-header">
+            <span class="timeline-year gradient-text">{{ item.year }}</span>
+            <span class="timeline-tag">{{ lang === 'TH' ? (item.tag_th || item.tag) : item.tag }}</span>
+          </div>
+          <h3>{{ lang === 'TH' ? (item.title_th || item.title) : item.title }}</h3>
+          <p>{{ lang === 'TH' ? (item.description_th || item.description) : item.description }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

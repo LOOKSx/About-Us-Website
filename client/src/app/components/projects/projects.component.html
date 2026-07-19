@@ -1,0 +1,65 @@
+<section id="projects" class="section-padding projects-section">
+  <div class="container">
+    <div class="section-header">
+      <div class="badge">{{ dict.projectsBadge }}</div>
+      <h2 class="section-title">{{ dict.projectsTitle }}</h2>
+      <p class="section-subtitle">{{ dict.projectsSub }}</p>
+      
+      <!-- Category Filter Tabs -->
+      <div class="filter-tabs">
+        <button class="tab-btn" [class.active]="selectedProjectCategory === 'all'" (click)="onFilter('all')">{{ dict.tabAll }}</button>
+        <button class="tab-btn" [class.active]="selectedProjectCategory === 'Fullstack'" (click)="onFilter('Fullstack')">{{ dict.tabFullstack }}</button>
+        <button class="tab-btn" [class.active]="selectedProjectCategory === 'Backend'" (click)="onFilter('Backend')">{{ dict.tabBackend }}</button>
+        <button class="tab-btn" [class.active]="selectedProjectCategory === 'Frontend'" (click)="onFilter('Frontend')">{{ dict.tabFrontend }}</button>
+      </div>
+    </div>
+
+    <div class="projects-grid">
+      <div class="project-card glass-panel" *ngFor="let proj of projects" (click)="onOpenModal(proj)">
+        <div class="project-img-wrapper">
+          <img [src]="proj.image_url" [alt]="proj.title" class="project-img">
+          <span class="project-cat-badge">{{ lang === 'TH' ? (proj.category_th || proj.category) : proj.category }}</span>
+        </div>
+
+        <div class="project-body">
+          <div class="project-date">{{ proj.date }}</div>
+          <h3 class="project-title">{{ lang === 'TH' ? (proj.title_th || proj.title) : proj.title }}</h3>
+          <p class="project-desc">{{ lang === 'TH' ? (proj.description_th || proj.description) : proj.description }}</p>
+
+          <div class="project-tags">
+            <span class="proj-tag" *ngFor="let tag of proj.tags">{{ tag }}</span>
+          </div>
+        </div>
+
+        <div class="card-action-overlay">
+          <span>{{ dict.viewProjectDetail }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Project Detail Modal -->
+<div class="modal-backdrop" *ngIf="selectedProject" (click)="onCloseModal()">
+  <div class="modal-content glass-panel" (click)="$event.stopPropagation()">
+    <button class="modal-close" (click)="onCloseModal()">✕</button>
+    <div class="modal-body project-modal">
+      <img [src]="selectedProject.image_url" [alt]="selectedProject.title" class="modal-project-img">
+      <div class="modal-info">
+        <div class="badge">{{ lang === 'TH' ? (selectedProject.category_th || selectedProject.category) : selectedProject.category }}</div>
+        <h2>{{ lang === 'TH' ? (selectedProject.title_th || selectedProject.title) : selectedProject.title }}</h2>
+        <p class="modal-bio">{{ lang === 'TH' ? (selectedProject.description_th || selectedProject.description) : selectedProject.description }}</p>
+
+        <div class="modal-section-title">Technologies Used</div>
+        <div class="skills-tags">
+          <span class="skill-tag" *ngFor="let tag of selectedProject.tags">{{ tag }}</span>
+        </div>
+
+        <div class="modal-socials">
+          <a [href]="selectedProject.github_url" target="_blank" rel="noopener" class="social-link">{{ dict.modalGithubLink }}</a>
+          <a [href]="selectedProject.demo_url" target="_blank" rel="noopener" class="social-link">{{ dict.modalDemoLink }}</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

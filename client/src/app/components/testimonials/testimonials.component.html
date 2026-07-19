@@ -1,0 +1,24 @@
+<section class="section-padding testimonials-section">
+  <div class="container">
+    <div class="section-header">
+      <div class="badge">{{ dict.testimonialsBadge }}</div>
+      <h2 class="section-title">{{ dict.testimonialsTitle }}</h2>
+    </div>
+
+    <div class="testimonials-grid">
+      <div class="testimonial-card glass-panel" *ngFor="let t of testimonials">
+        <div class="rating-stars">
+          <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
+        </div>
+        <p class="quote">"{{ lang === 'TH' ? (t.quote_th || t.quote) : t.quote }}"</p>
+        <div class="client-meta">
+          <img [src]="t.avatar" [alt]="t.client" class="client-avatar">
+          <div>
+            <div class="client-name">{{ t.client }}</div>
+            <div class="client-company">{{ t.company }} • <span>{{ lang === 'TH' ? (t.project_th || t.project) : t.project }}</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

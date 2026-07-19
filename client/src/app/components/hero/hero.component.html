@@ -1,0 +1,60 @@
+<section id="about" class="hero-section">
+  <div class="container hero-container">
+    <div class="hero-content">
+      <div class="badge badge-green">
+        <span class="pulse-dot"></span> {{ dict.heroBadge }}
+      </div>
+
+      <h1 class="hero-title">
+        {{ lang === 'TH' ? 'สวัสดีครับ ผม' : 'Hi, I am' }} <span class="gradient-text">{{ lang === 'TH' ? (profile?.name_th || profile?.name) : profile?.name }}</span>
+      </h1>
+      <h2 class="hero-subtitle gradient-text-cyan">
+        {{ lang === 'TH' ? (profile?.title_th || profile?.title) : profile?.title }}
+      </h2>
+
+      <p class="hero-bio">
+        {{ lang === 'TH' ? (profile?.hero_bio_th || profile?.hero_bio) : profile?.hero_bio }}
+      </p>
+
+      <div class="hero-cta">
+        <a href="#projects" class="btn btn-primary">
+          {{ dict.heroViewProjects }}
+        </a>
+        <a href="#contact" class="btn btn-outline">
+          {{ dict.heroGetInTouch }}
+        </a>
+      </div>
+
+      <!-- Personal Social Links -->
+      <div class="hero-social-links">
+        <a [href]="profile?.github_url" target="_blank" rel="noopener" class="social-pill">
+          <span class="icon">💻</span> GitHub
+        </a>
+        <a [href]="profile?.linkedin_url" target="_blank" rel="noopener" class="social-pill">
+          <span class="icon">💼</span> LinkedIn
+        </a>
+        <a [href]="profile?.facebook_url" target="_blank" rel="noopener" class="social-pill">
+          <span class="icon">🌐</span> Facebook
+        </a>
+      </div>
+    </div>
+
+    <div class="hero-visual">
+      <div class="personal-card-wrapper glass-panel">
+        <div class="profile-avatar-box">
+          <img [src]="profile?.avatar_url" [alt]="profile?.name" class="hero-avatar">
+          <div class="avatar-glow"></div>
+        </div>
+        <div class="profile-quick-info">
+          <h3 class="profile-name">{{ lang === 'TH' ? (profile?.name_th || profile?.name) : profile?.name }}</h3>
+          <p class="profile-loc">📍 {{ lang === 'TH' ? (profile?.location_th || profile?.location) : profile?.location }}</p>
+          <div class="tech-pills-mini">
+            <span class="pill">⚡ Golang</span>
+            <span class="pill">🅰️ Angular 19</span>
+            <span class="pill">🐳 Docker</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

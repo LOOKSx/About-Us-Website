@@ -1,0 +1,59 @@
+<header class="navbar-wrapper">
+  <div class="container navbar">
+    <div class="brand">
+      <div class="brand-avatar-sm">
+        <img [src]="profile?.avatar_url" [alt]="profile?.name">
+      </div>
+      <div class="brand-text">
+        <span class="brand-name">{{ lang === 'TH' ? (profile?.name_th || profile?.name) : profile?.name }}</span>
+        <span class="brand-sub">{{ lang === 'TH' ? (profile?.title_th || profile?.title) : profile?.title }}</span>
+      </div>
+    </div>
+
+    <nav class="nav-links desktop-only">
+      <a href="#about">{{ dict.navAbout }}</a>
+      <a href="#skills">{{ dict.navSkills }}</a>
+      <a href="#projects">{{ dict.navProjects }}</a>
+      <a href="#journey">{{ dict.navJourney }}</a>
+      <a href="#services">{{ dict.navServices }}</a>
+      <a href="#faq">{{ dict.navFaq }}</a>
+      <a href="#contact" class="btn btn-primary btn-sm">{{ dict.navContact }}</a>
+    </nav>
+
+    <div class="nav-actions">
+      <!-- Language Switcher Pill -->
+      <button class="lang-toggle-btn" (click)="onToggleLang()" title="Toggle Language (TH / EN)">
+        <span class="lang-flag">{{ lang === 'TH' ? '🇹🇭' : '🇬🇧' }}</span>
+        <span class="lang-code">{{ lang }}</span>
+      </button>
+
+      <!-- Go Backend Health Indicator -->
+      <div class="api-status-badge" [class.online]="apiOnline" [title]="apiOnline ? 'Go REST API Connected: ' + apiLatency + 'ms' : 'Go Backend Offline'">
+        <div class="status-dot"></div>
+        <span class="status-text">{{ apiOnline ? 'Go API (' + apiLatency + 'ms)' : (lang === 'TH' ? 'Go API ออฟไลน์' : 'Go API Offline') }}</span>
+      </div>
+
+      <!-- Mobile Hamburger Toggle Button -->
+      <button class="mobile-toggle-btn" (click)="onToggleMobileMenu()" aria-label="Toggle navigation">
+        <span>{{ mobileMenuOpen ? '✕' : '☰' }}</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Mobile Drawer Menu -->
+  <div class="mobile-drawer glass-panel" [class.open]="mobileMenuOpen">
+    <div class="mobile-drawer-header">
+      <span>🌐 Switch Language:</span>
+      <button class="lang-toggle-btn sm" (click)="onToggleLang()">
+        <span>{{ lang === 'TH' ? '🇹🇭 ภาษาไทย' : '🇬🇧 English' }}</span>
+      </button>
+    </div>
+    <a href="#about" (click)="onCloseMobileMenu()">{{ dict.navAbout }}</a>
+    <a href="#skills" (click)="onCloseMobileMenu()">{{ dict.navSkills }}</a>
+    <a href="#projects" (click)="onCloseMobileMenu()">{{ dict.navProjects }}</a>
+    <a href="#journey" (click)="onCloseMobileMenu()">{{ dict.navJourney }}</a>
+    <a href="#services" (click)="onCloseMobileMenu()">{{ dict.navServices }}</a>
+    <a href="#faq" (click)="onCloseMobileMenu()">{{ dict.navFaq }}</a>
+    <a href="#contact" class="btn btn-primary btn-block" (click)="onCloseMobileMenu()">{{ dict.navContact }}</a>
+  </div>
+</header>

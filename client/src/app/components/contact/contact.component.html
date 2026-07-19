@@ -1,0 +1,48 @@
+<section id="contact" class="section-padding contact-section">
+  <div class="container">
+    <div class="contact-box glass-panel">
+      <div class="contact-header text-center">
+        <div class="badge">{{ dict.contactBadge }}</div>
+        <h2 class="section-title">{{ dict.contactTitle }}</h2>
+        <p>{{ dict.contactSub }}</p>
+      </div>
+
+      <form (ngSubmit)="onSubmit()" class="contact-form">
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="name">{{ dict.labelName }}</label>
+            <input type="text" id="name" name="name" [(ngModel)]="contactForm.name" [placeholder]="dict.phName" required class="form-input">
+          </div>
+
+          <div class="form-group">
+            <label for="email">{{ dict.labelEmail }}</label>
+            <input type="email" id="email" name="email" [(ngModel)]="contactForm.email" [placeholder]="dict.phEmail" required class="form-input">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="subject">{{ dict.labelSubject }}</label>
+          <input type="text" id="subject" name="subject" [(ngModel)]="contactForm.subject" [placeholder]="dict.phSubject" class="form-input">
+        </div>
+
+        <div class="form-group">
+          <label for="message">{{ dict.labelMessage }}</label>
+          <textarea id="message" name="message" [(ngModel)]="contactForm.message" rows="4" [placeholder]="dict.phMessage" required class="form-input"></textarea>
+        </div>
+
+        <!-- Alert Notifications -->
+        <div class="alert alert-success" *ngIf="contactSuccessMessage">
+          ✅ {{ contactSuccessMessage }}
+        </div>
+        <div class="alert alert-danger" *ngIf="contactErrorMessage">
+          ⚠️ {{ contactErrorMessage }}
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block" [disabled]="contactSubmitting">
+          <span *ngIf="!contactSubmitting">{{ dict.btnSend }}</span>
+          <span *ngIf="contactSubmitting">{{ dict.btnSending }}</span>
+        </button>
+      </form>
+    </div>
+  </div>
+</section>

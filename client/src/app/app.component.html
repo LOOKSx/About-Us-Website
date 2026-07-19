@@ -1,0 +1,445 @@
+<!-- Sticky Navigation Bar -->
+<header class="navbar-wrapper">
+  <div class="container navbar">
+    <div class="brand">
+      <div class="brand-avatar-sm">
+        <img [src]="profile?.avatar_url" [alt]="profile?.name">
+      </div>
+      <div class="brand-text">
+        <span class="brand-name">Phuttiphong <span class="gradient-text">Ratcharak</span></span>
+        <span class="brand-sub">Software Engineer</span>
+      </div>
+    </div>
+
+    <nav class="nav-links desktop-only">
+      <a href="#about">{{ dict[lang].navAbout }}</a>
+      <a href="#skills">{{ dict[lang].navSkills }}</a>
+      <a href="#projects">{{ dict[lang].navProjects }}</a>
+      <a href="#journey">{{ dict[lang].navJourney }}</a>
+      <a href="#services">{{ dict[lang].navServices }}</a>
+      <a href="#faq">{{ dict[lang].navFaq }}</a>
+      <a href="#contact" class="btn btn-primary btn-sm">{{ dict[lang].navContact }}</a>
+    </nav>
+
+    <div class="nav-actions">
+      <!-- Language Switcher Pill -->
+      <button class="lang-toggle-btn" (click)="toggleLang()" title="Toggle Language (TH / EN)">
+        <span class="lang-flag">{{ lang === 'TH' ? '🇹🇭' : '🇬🇧' }}</span>
+        <span class="lang-code">{{ lang }}</span>
+      </button>
+
+      <!-- System Health Indicator -->
+      <div class="api-status-badge" [class.online]="apiOnline" [title]="apiOnline ? 'System Live' : 'System Offline'">
+        <div class="status-dot"></div>
+        <span class="status-text">{{ apiOnline ? 'Go API (' + apiLatency + 'ms)' : (lang === 'TH' ? 'ระบบออฟไลน์' : 'System Offline') }}</span>
+      </div>
+
+      <!-- Mobile Hamburger Toggle Button -->
+      <button class="mobile-toggle-btn" (click)="toggleMobileMenu()" aria-label="Toggle navigation">
+        <span>{{ mobileMenuOpen ? '✕' : '☰' }}</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Mobile Drawer Menu -->
+  <div class="mobile-drawer glass-panel" [class.open]="mobileMenuOpen">
+    <div class="mobile-drawer-header">
+      <span>🌐 {{ lang === 'TH' ? 'เลือกภาษา:' : 'Language:' }}</span>
+      <button class="lang-toggle-btn sm" (click)="toggleLang()">
+        <span>{{ lang === 'TH' ? '🇹🇭 ภาษาไทย' : '🇬🇧 English' }}</span>
+      </button>
+    </div>
+    <a href="#about" (click)="closeMobileMenu()">{{ dict[lang].navAbout }}</a>
+    <a href="#skills" (click)="closeMobileMenu()">{{ dict[lang].navSkills }}</a>
+    <a href="#projects" (click)="closeMobileMenu()">{{ dict[lang].navProjects }}</a>
+    <a href="#journey" (click)="closeMobileMenu()">{{ dict[lang].navJourney }}</a>
+    <a href="#services" (click)="closeMobileMenu()">{{ dict[lang].navServices }}</a>
+    <a href="#faq" (click)="closeMobileMenu()">{{ dict[lang].navFaq }}</a>
+    <a href="#contact" class="btn btn-primary btn-block" (click)="closeMobileMenu()">{{ dict[lang].navContact }}</a>
+  </div>
+</header>
+
+<main>
+  <!-- Formal Hero Section -->
+  <section id="about" class="hero-section">
+    <div class="container hero-container">
+      <div class="hero-content">
+        <div class="badge badge-green">
+          <span class="pulse-dot"></span> {{ dict[lang].heroBadge }}
+        </div>
+
+        <h1 class="hero-title">
+          {{ lang === 'TH' ? 'พุฒิพงศ์ ราชรักษ์' : 'Phuttiphong Ratcharak' }}
+        </h1>
+        <h2 class="hero-subtitle gradient-text">
+          {{ lang === 'TH' ? (profile?.title_th || profile?.title) : profile?.title }}
+        </h2>
+
+        <p class="hero-bio">
+          {{ lang === 'TH' ? (profile?.hero_bio_th || profile?.hero_bio) : profile?.hero_bio }}
+        </p>
+
+        <div class="hero-cta">
+          <a href="#projects" class="btn btn-primary">
+            {{ dict[lang].heroViewProjects }}
+          </a>
+          <a href="#contact" class="btn btn-outline">
+            {{ dict[lang].heroGetInTouch }}
+          </a>
+        </div>
+
+        <!-- Social Media Links -->
+        <div class="hero-social-links">
+          <a [href]="profile?.github_url" target="_blank" rel="noopener" class="social-pill">
+            <span class="icon">💻</span> GitHub
+          </a>
+          <a [href]="profile?.linkedin_url" target="_blank" rel="noopener" class="social-pill">
+            <span class="icon">💼</span> LinkedIn
+          </a>
+          <a [href]="profile?.facebook_url" target="_blank" rel="noopener" class="social-pill">
+            <span class="icon">🌐</span> Facebook
+          </a>
+        </div>
+      </div>
+
+      <div class="hero-visual">
+        <div class="personal-card-wrapper glass-panel">
+          <div class="profile-avatar-box">
+            <img [src]="profile?.avatar_url" [alt]="profile?.name" class="hero-avatar">
+            <div class="avatar-glow"></div>
+          </div>
+          <div class="profile-quick-info">
+            <h3 class="profile-name">Phuttiphong Ratcharak</h3>
+            <p class="profile-loc">📍 {{ lang === 'TH' ? (profile?.location_th || profile?.location) : profile?.location }}</p>
+            <div class="tech-pills-mini">
+              <span class="pill">⚡ Golang</span>
+              <span class="pill">🅰️ Angular 19</span>
+              <span class="pill">🛡️ Clean Architecture</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Key Accomplishments & Stats -->
+  <section class="stats-section">
+    <div class="container">
+      <div class="stats-grid">
+        <div class="stat-card glass-panel" *ngFor="let stat of stats">
+          <div class="stat-icon">{{ stat.icon }}</div>
+          <div class="stat-number gradient-text">{{ stat.value }}</div>
+          <div class="stat-label">{{ lang === 'TH' ? (stat.label_th || stat.label) : stat.label }}</div>
+          <div class="stat-highlight">{{ lang === 'TH' ? (stat.highlight_th || stat.highlight) : stat.highlight }}</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Technical Skills & Capabilities -->
+  <section id="skills" class="section-padding skills-section">
+    <div class="container">
+      <div class="section-header">
+        <div class="badge">{{ dict[lang].skillsBadge }}</div>
+        <h2 class="section-title">{{ dict[lang].skillsTitle }}</h2>
+        <p class="section-subtitle">{{ dict[lang].skillsSub }}</p>
+      </div>
+
+      <div class="skills-grid">
+        <div class="skill-card glass-panel" *ngFor="let sk of skills">
+          <div class="skill-header">
+            <div class="skill-title-group">
+              <span class="skill-icon">{{ sk.icon }}</span>
+              <h4>{{ sk.name }}</h4>
+            </div>
+            <span class="skill-prof-tag gradient-text">{{ sk.proficiency }}%</span>
+          </div>
+          
+          <div class="progress-bar-track">
+            <div class="progress-bar-fill" [style.width.%]="sk.proficiency"></div>
+          </div>
+
+          <p class="skill-desc">{{ lang === 'TH' ? (sk.description_th || sk.description) : sk.description }}</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Portfolio Projects & Achievements -->
+  <section id="projects" class="section-padding projects-section">
+    <div class="container">
+      <div class="section-header">
+        <div class="badge">{{ dict[lang].projectsBadge }}</div>
+        <h2 class="section-title">{{ dict[lang].projectsTitle }}</h2>
+        <p class="section-subtitle">{{ dict[lang].projectsSub }}</p>
+        
+        <!-- Category Tabs -->
+        <div class="filter-tabs">
+          <button class="tab-btn" [class.active]="selectedProjectCategory === 'all'" (click)="filterProjects('all')">{{ dict[lang].tabAll }}</button>
+          <button class="tab-btn" [class.active]="selectedProjectCategory === 'Fullstack'" (click)="filterProjects('Fullstack')">{{ dict[lang].tabFullstack }}</button>
+          <button class="tab-btn" [class.active]="selectedProjectCategory === 'Backend'" (click)="filterProjects('Backend')">{{ dict[lang].tabBackend }}</button>
+        </div>
+      </div>
+
+      <div class="projects-grid">
+        <div class="project-card glass-panel" *ngFor="let proj of projects" (click)="openProjectModal(proj)">
+          <div class="project-img-wrapper">
+            <img [src]="proj.image_url" [alt]="proj.title" class="project-img">
+            <span class="project-cat-badge">{{ lang === 'TH' ? (proj.category_th || proj.category) : proj.category }}</span>
+          </div>
+
+          <div class="project-body">
+            <div class="project-date">{{ proj.date }}</div>
+            <h3 class="project-title">{{ lang === 'TH' ? (proj.title_th || proj.title) : proj.title }}</h3>
+            <p class="project-desc">{{ lang === 'TH' ? (proj.description_th || proj.description) : proj.description }}</p>
+
+            <div class="project-tags">
+              <span class="proj-tag" *ngFor="let tag of proj.tags">{{ tag }}</span>
+            </div>
+          </div>
+
+          <div class="card-action-overlay">
+            <span>{{ dict[lang].viewProjectDetail }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Project Detail Modal -->
+  <div class="modal-backdrop" *ngIf="selectedProject" (click)="closeProjectModal()">
+    <div class="modal-content glass-panel" (click)="$event.stopPropagation()">
+      <button class="modal-close" (click)="closeProjectModal()">✕</button>
+      <div class="modal-body project-modal">
+        <img [src]="selectedProject.image_url" [alt]="selectedProject.title" class="modal-project-img">
+        <div class="modal-info">
+          <div class="badge">{{ lang === 'TH' ? (selectedProject.category_th || selectedProject.category) : selectedProject.category }}</div>
+          <h2>{{ lang === 'TH' ? (selectedProject.title_th || selectedProject.title) : selectedProject.title }}</h2>
+          <p class="modal-bio">{{ lang === 'TH' ? (selectedProject.description_th || selectedProject.description) : selectedProject.description }}</p>
+
+          <div class="modal-section-title">Technologies Used</div>
+          <div class="skills-tags">
+            <span class="skill-tag" *ngFor="let tag of selectedProject.tags">{{ tag }}</span>
+          </div>
+
+          <div class="modal-socials">
+            <a [href]="selectedProject.github_url" target="_blank" rel="noopener" class="social-link">{{ dict[lang].modalGithubLink }}</a>
+            <a [href]="selectedProject.demo_url" target="_blank" rel="noopener" class="social-link">{{ dict[lang].modalDemoLink }}</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Professional Experience Timeline -->
+  <section id="journey" class="section-padding timeline-section">
+    <div class="container">
+      <div class="section-header">
+        <div class="badge">{{ dict[lang].journeyBadge }}</div>
+        <h2 class="section-title">{{ dict[lang].journeyTitle }}</h2>
+        <p class="section-subtitle">{{ dict[lang].journeySub }}</p>
+      </div>
+
+      <div class="timeline-container">
+        <div class="timeline-item" *ngFor="let item of timeline">
+          <div class="timeline-marker">
+            <span>{{ item.icon }}</span>
+          </div>
+          <div class="timeline-content glass-panel">
+            <div class="timeline-header">
+              <span class="timeline-year gradient-text">{{ item.year }}</span>
+              <span class="timeline-tag">{{ lang === 'TH' ? (item.tag_th || item.tag) : item.tag }}</span>
+            </div>
+            <h3>{{ lang === 'TH' ? (item.title_th || item.title) : item.title }}</h3>
+            <p>{{ lang === 'TH' ? (item.description_th || item.description) : item.description }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Work Standards & Philosophy -->
+  <section id="values" class="section-padding values-section">
+    <div class="container">
+      <div class="section-header">
+        <div class="badge">{{ dict[lang].valuesBadge }}</div>
+        <h2 class="section-title">{{ dict[lang].valuesTitle }}</h2>
+        <p class="section-subtitle">{{ lang === 'TH' ? (profile?.full_story_th || profile?.full_story) : profile?.full_story }}</p>
+      </div>
+
+      <div class="vision-mission-grid">
+        <div class="vm-card glass-panel">
+          <div class="vm-icon">👁️</div>
+          <h3>{{ dict[lang].visionTitle }}</h3>
+          <p>{{ lang === 'TH' ? (profile?.vision_th || profile?.vision) : profile?.vision }}</p>
+        </div>
+        <div class="vm-card glass-panel">
+          <div class="vm-icon">🎯</div>
+          <h3>{{ dict[lang].missionTitle }}</h3>
+          <p>{{ lang === 'TH' ? (profile?.mission_th || profile?.mission) : profile?.mission }}</p>
+        </div>
+      </div>
+
+      <div class="values-grid">
+        <div class="value-card glass-panel" *ngFor="let val of profile?.core_values">
+          <div class="value-icon">{{ val.icon }}</div>
+          <h4>{{ lang === 'TH' ? (val.title_th || val.title) : val.title }}</h4>
+          <p>{{ lang === 'TH' ? (val.description_th || val.description) : val.description }}</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Software Engineering Services -->
+  <section id="services" class="section-padding services-section">
+    <div class="container">
+      <div class="section-header">
+        <div class="badge">{{ dict[lang].servicesBadge }}</div>
+        <h2 class="section-title">{{ dict[lang].servicesTitle }}</h2>
+        <p class="section-subtitle">{{ dict[lang].servicesSub }}</p>
+      </div>
+
+      <div class="services-grid">
+        <div class="service-card glass-panel" *ngFor="let srv of services">
+          <div class="service-icon">{{ srv.icon }}</div>
+          <span class="service-category">{{ srv.category }}</span>
+          <h3>{{ lang === 'TH' ? (srv.title_th || srv.title) : srv.title }}</h3>
+          <p>{{ lang === 'TH' ? (srv.description_th || srv.description) : srv.description }}</p>
+          <ul class="highlights-list">
+            <ng-container *ngIf="lang === 'TH' && srv.highlights_th">
+              <li *ngFor="let h of srv.highlights_th">
+                <span class="check-icon">✓</span> {{ h }}
+              </li>
+            </ng-container>
+            <ng-container *ngIf="lang !== 'TH' || !srv.highlights_th">
+              <li *ngFor="let h of srv.highlights">
+                <span class="check-icon">✓</span> {{ h }}
+              </li>
+            </ng-container>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Endorsements & Feedback -->
+  <section class="section-padding testimonials-section">
+    <div class="container">
+      <div class="section-header">
+        <div class="badge">{{ dict[lang].testimonialsBadge }}</div>
+        <h2 class="section-title">{{ dict[lang].testimonialsTitle }}</h2>
+      </div>
+
+      <div class="testimonials-grid">
+        <div class="testimonial-card glass-panel" *ngFor="let t of testimonials">
+          <div class="rating-stars">
+            <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
+          </div>
+          <p class="quote">"{{ lang === 'TH' ? (t.quote_th || t.quote) : t.quote }}"</p>
+          <div class="client-meta">
+            <img [src]="t.avatar" [alt]="t.client" class="client-avatar">
+            <div>
+              <div class="client-name">{{ t.client }}</div>
+              <div class="client-company">{{ t.company }} • <span>{{ lang === 'TH' ? (t.project_th || t.project) : t.project }}</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ Section -->
+  <section id="faq" class="section-padding faq-section">
+    <div class="container">
+      <div class="section-header">
+        <div class="badge">{{ dict[lang].faqBadge }}</div>
+        <h2 class="section-title">{{ dict[lang].faqTitle }}</h2>
+      </div>
+
+      <div class="faq-accordion">
+        <div class="faq-item glass-panel" *ngFor="let faq of faqs" [class.open]="activeFaqId === faq.id" (click)="toggleFaq(faq.id)">
+          <div class="faq-question">
+            <h3>{{ lang === 'TH' ? (faq.question_th || faq.question) : faq.question }}</h3>
+            <span class="faq-toggle">{{ activeFaqId === faq.id ? '−' : '+' }}</span>
+          </div>
+          <div class="faq-answer" *ngIf="activeFaqId === faq.id">
+            <p>{{ lang === 'TH' ? (faq.answer_th || faq.answer) : faq.answer }}</p>
+            <span class="faq-cat-badge">{{ lang === 'TH' ? (faq.category_th || faq.category) : faq.category }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact Form Section -->
+  <section id="contact" class="section-padding contact-section">
+    <div class="container">
+      <div class="contact-box glass-panel">
+        <div class="contact-header text-center">
+          <div class="badge">{{ dict[lang].contactBadge }}</div>
+          <h2 class="section-title">{{ dict[lang].contactTitle }}</h2>
+          <p>{{ dict[lang].contactSub }}</p>
+        </div>
+
+        <form (ngSubmit)="submitContact()" class="contact-form">
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="name">{{ dict[lang].labelName }}</label>
+              <input type="text" id="name" name="name" [(ngModel)]="contactForm.name" [placeholder]="dict[lang].phName" required class="form-input">
+            </div>
+
+            <div class="form-group">
+              <label for="email">{{ dict[lang].labelEmail }}</label>
+              <input type="email" id="email" name="email" [(ngModel)]="contactForm.email" [placeholder]="dict[lang].phEmail" required class="form-input">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="subject">{{ dict[lang].labelSubject }}</label>
+            <input type="text" id="subject" name="subject" [(ngModel)]="contactForm.subject" [placeholder]="dict[lang].phSubject" class="form-input">
+          </div>
+
+          <div class="form-group">
+            <label for="message">{{ dict[lang].labelMessage }}</label>
+            <textarea id="message" name="message" [(ngModel)]="contactForm.message" rows="4" [placeholder]="dict[lang].phMessage" required class="form-input"></textarea>
+          </div>
+
+          <!-- Alert Notifications -->
+          <div class="alert alert-success" *ngIf="contactSuccessMessage">
+            ✅ {{ contactSuccessMessage }}
+          </div>
+          <div class="alert alert-danger" *ngIf="contactErrorMessage">
+            ⚠️ {{ contactErrorMessage }}
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-block" [disabled]="contactSubmitting">
+            <span *ngIf="!contactSubmitting">{{ dict[lang].btnSend }}</span>
+            <span *ngIf="contactSubmitting">{{ dict[lang].btnSending }}</span>
+          </button>
+        </form>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- Footer -->
+<footer class="footer">
+  <div class="container footer-container">
+    <div class="footer-brand">
+      <div class="brand-name">Phuttiphong <span class="gradient-text">Ratcharak</span></div>
+      <p>{{ dict[lang].footerSub }}</p>
+    </div>
+
+    <div class="footer-links">
+      <a href="#about">{{ dict[lang].navAbout }}</a>
+      <a href="#skills">{{ dict[lang].navSkills }}</a>
+      <a href="#projects">{{ dict[lang].navProjects }}</a>
+      <a href="#journey">{{ dict[lang].navJourney }}</a>
+      <a href="#faq">{{ dict[lang].navFaq }}</a>
+    </div>
+
+    <div class="footer-copyright">
+      {{ dict[lang].footerRights }}
+    </div>
+  </div>
+</footer>

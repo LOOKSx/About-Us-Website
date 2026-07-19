@@ -1,0 +1,27 @@
+<section id="skills" class="section-padding skills-section">
+  <div class="container">
+    <div class="section-header">
+      <div class="badge">{{ dict.skillsBadge }}</div>
+      <h2 class="section-title">{{ dict.skillsTitle }}</h2>
+      <p class="section-subtitle">{{ dict.skillsSub }}</p>
+    </div>
+
+    <div class="skills-grid">
+      <div class="skill-card glass-panel" *ngFor="let sk of skills">
+        <div class="skill-header">
+          <div class="skill-title-group">
+            <span class="skill-icon">{{ sk.icon }}</span>
+            <h4>{{ sk.name }}</h4>
+          </div>
+          <span class="skill-prof-tag gradient-text">{{ sk.proficiency }}%</span>
+        </div>
+        
+        <div class="progress-bar-track">
+          <div class="progress-bar-fill" [style.width.%]="sk.proficiency"></div>
+        </div>
+
+        <p class="skill-desc">{{ lang === 'TH' ? (sk.description_th || sk.description) : sk.description }}</p>
+      </div>
+    </div>
+  </div>
+</section>

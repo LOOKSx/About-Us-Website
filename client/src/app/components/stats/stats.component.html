@@ -1,0 +1,12 @@
+<section class="stats-section">
+  <div class="container">
+    <div class="stats-grid">
+      <div class="stat-card glass-panel" *ngFor="let stat of stats">
+        <div class="stat-icon">{{ stat.icon }}</div>
+        <div class="stat-number gradient-text">{{ stat.value }}</div>
+        <div class="stat-label">{{ lang === 'TH' ? (stat.label_th || stat.label) : stat.label }}</div>
+        <div class="stat-highlight">{{ lang === 'TH' ? (stat.highlight_th || stat.highlight) : stat.highlight }}</div>
+      </div>
+    </div>
+  </div>
+</section>

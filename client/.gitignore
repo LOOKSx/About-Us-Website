@@ -1,0 +1,21 @@
+# Compiled output
+/dist
+/tmp
+/out-tsc
+/.angular
+
+# Node dependencies
+/node_modules
+
+# IDEs and editors
+/.idea
+/.project
+/.classpath
+/.cproject
+/.settings
+/*.sublime-workspace
+/.vscode/*
+
+# Operating System
+.DS_Store
+Thumbs.db

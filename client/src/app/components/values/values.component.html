@@ -1,0 +1,30 @@
+<section id="values" class="section-padding values-section">
+  <div class="container">
+    <div class="section-header">
+      <div class="badge">{{ dict.valuesBadge }}</div>
+      <h2 class="section-title">{{ dict.valuesTitle }}</h2>
+      <p class="section-subtitle">{{ lang === 'TH' ? (profile?.full_story_th || profile?.full_story) : profile?.full_story }}</p>
+    </div>
+
+    <div class="vision-mission-grid">
+      <div class="vm-card glass-panel">
+        <div class="vm-icon">👁️</div>
+        <h3>{{ dict.visionTitle }}</h3>
+        <p>{{ lang === 'TH' ? (profile?.vision_th || profile?.vision) : profile?.vision }}</p>
+      </div>
+      <div class="vm-card glass-panel">
+        <div class="vm-icon">🎯</div>
+        <h3>{{ dict.missionTitle }}</h3>
+        <p>{{ lang === 'TH' ? (profile?.mission_th || profile?.mission) : profile?.mission }}</p>
+      </div>
+    </div>
+
+    <div class="values-grid">
+      <div class="value-card glass-panel" *ngFor="let val of profile?.core_values">
+        <div class="value-icon">{{ val.icon }}</div>
+        <h4>{{ lang === 'TH' ? (val.title_th || val.title) : val.title }}</h4>
+        <p>{{ lang === 'TH' ? (val.description_th || val.description) : val.description }}</p>
+      </div>
+    </div>
+  </div>
+</section>

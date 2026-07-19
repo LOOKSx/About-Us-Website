@@ -1,0 +1,21 @@
+<section id="faq" class="section-padding faq-section">
+  <div class="container">
+    <div class="section-header">
+      <div class="badge">{{ dict.faqBadge }}</div>
+      <h2 class="section-title">{{ dict.faqTitle }}</h2>
+    </div>
+
+    <div class="faq-accordion">
+      <div class="faq-item glass-panel" *ngFor="let faq of faqs" [class.open]="activeFaqId === faq.id" (click)="onToggleFaq(faq.id)">
+        <div class="faq-question">
+          <h3>{{ lang === 'TH' ? (faq.question_th || faq.question) : faq.question }}</h3>
+          <span class="faq-toggle">{{ activeFaqId === faq.id ? '−' : '+' }}</span>
+        </div>
+        <div class="faq-answer" *ngIf="activeFaqId === faq.id">
+          <p>{{ lang === 'TH' ? (faq.answer_th || faq.answer) : faq.answer }}</p>
+          <span class="faq-cat-badge">{{ lang === 'TH' ? (faq.category_th || faq.category) : faq.category }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
