@@ -1,4 +1,4 @@
-<!-- Sticky Navigation Bar -->
+<!-- Clean Corporate Navbar -->
 <header class="navbar-wrapper">
   <div class="container navbar">
     <div class="brand">
@@ -6,7 +6,7 @@
         <img [src]="profile?.avatar_url" [alt]="profile?.name">
       </div>
       <div class="brand-text">
-        <span class="brand-name">Phuttiphong <span class="gradient-text">Ratcharak</span></span>
+        <span class="brand-name">Phuttiphong Ratcharak</span>
         <span class="brand-sub">Software Engineer</span>
       </div>
     </div>
@@ -22,19 +22,12 @@
     </nav>
 
     <div class="nav-actions">
-      <!-- Language Switcher Pill -->
-      <button class="lang-toggle-btn" (click)="toggleLang()" title="Toggle Language (TH / EN)">
-        <span class="lang-flag">{{ lang === 'TH' ? '🇹🇭' : '🇬🇧' }}</span>
-        <span class="lang-code">{{ lang }}</span>
+      <!-- Simple Clean Language Toggle -->
+      <button class="lang-toggle-btn" (click)="toggleLang()" title="Toggle Language">
+        <span>{{ lang === 'TH' ? '🇹🇭 TH' : '🇬🇧 EN' }}</span>
       </button>
 
-      <!-- System Health Indicator -->
-      <div class="api-status-badge" [class.online]="apiOnline" [title]="apiOnline ? 'System Live' : 'System Offline'">
-        <div class="status-dot"></div>
-        <span class="status-text">{{ apiOnline ? 'Go API (' + apiLatency + 'ms)' : (lang === 'TH' ? 'ระบบออฟไลน์' : 'System Offline') }}</span>
-      </div>
-
-      <!-- Mobile Hamburger Toggle Button -->
+      <!-- Mobile Hamburger Button -->
       <button class="mobile-toggle-btn" (click)="toggleMobileMenu()" aria-label="Toggle navigation">
         <span>{{ mobileMenuOpen ? '✕' : '☰' }}</span>
       </button>
@@ -60,7 +53,7 @@
 </header>
 
 <main>
-  <!-- Formal Hero Section -->
+  <!-- Standard Corporate Hero Section -->
   <section id="about" class="hero-section">
     <div class="container hero-container">
       <div class="hero-content">
@@ -71,7 +64,7 @@
         <h1 class="hero-title">
           {{ lang === 'TH' ? 'พุฒิพงศ์ ราชรักษ์' : 'Phuttiphong Ratcharak' }}
         </h1>
-        <h2 class="hero-subtitle gradient-text">
+        <h2 class="hero-subtitle">
           {{ lang === 'TH' ? (profile?.title_th || profile?.title) : profile?.title }}
         </h2>
 
@@ -90,15 +83,9 @@
 
         <!-- Social Media Links -->
         <div class="hero-social-links">
-          <a [href]="profile?.github_url" target="_blank" rel="noopener" class="social-pill">
-            <span class="icon">💻</span> GitHub
-          </a>
-          <a [href]="profile?.linkedin_url" target="_blank" rel="noopener" class="social-pill">
-            <span class="icon">💼</span> LinkedIn
-          </a>
-          <a [href]="profile?.facebook_url" target="_blank" rel="noopener" class="social-pill">
-            <span class="icon">🌐</span> Facebook
-          </a>
+          <a [href]="profile?.github_url" target="_blank" rel="noopener" class="social-pill">GitHub</a>
+          <a [href]="profile?.linkedin_url" target="_blank" rel="noopener" class="social-pill">LinkedIn</a>
+          <a [href]="profile?.facebook_url" target="_blank" rel="noopener" class="social-pill">Facebook</a>
         </div>
       </div>
 
@@ -106,15 +93,14 @@
         <div class="personal-card-wrapper glass-panel">
           <div class="profile-avatar-box">
             <img [src]="profile?.avatar_url" [alt]="profile?.name" class="hero-avatar">
-            <div class="avatar-glow"></div>
           </div>
           <div class="profile-quick-info">
             <h3 class="profile-name">Phuttiphong Ratcharak</h3>
             <p class="profile-loc">📍 {{ lang === 'TH' ? (profile?.location_th || profile?.location) : profile?.location }}</p>
             <div class="tech-pills-mini">
-              <span class="pill">⚡ Golang</span>
-              <span class="pill">🅰️ Angular 19</span>
-              <span class="pill">🛡️ Clean Architecture</span>
+              <span class="pill">Golang</span>
+              <span class="pill">Angular 19</span>
+              <span class="pill">Clean Architecture</span>
             </div>
           </div>
         </div>
@@ -122,13 +108,12 @@
     </div>
   </section>
 
-  <!-- Key Accomplishments & Stats -->
+  <!-- Key Achievements & Stats Section (No Text Truncation) -->
   <section class="stats-section">
     <div class="container">
       <div class="stats-grid">
         <div class="stat-card glass-panel" *ngFor="let stat of stats">
-          <div class="stat-icon">{{ stat.icon }}</div>
-          <div class="stat-number gradient-text">{{ stat.value }}</div>
+          <div class="stat-number">{{ stat.value }}</div>
           <div class="stat-label">{{ lang === 'TH' ? (stat.label_th || stat.label) : stat.label }}</div>
           <div class="stat-highlight">{{ lang === 'TH' ? (stat.highlight_th || stat.highlight) : stat.highlight }}</div>
         </div>
@@ -137,7 +122,7 @@
   </section>
 
   <!-- Technical Skills & Capabilities -->
-  <section id="skills" class="section-padding skills-section">
+  <section id="skills" class="section-padding skills-section section-bg-alt">
     <div class="container">
       <div class="section-header">
         <div class="badge">{{ dict[lang].skillsBadge }}</div>
@@ -149,10 +134,9 @@
         <div class="skill-card glass-panel" *ngFor="let sk of skills">
           <div class="skill-header">
             <div class="skill-title-group">
-              <span class="skill-icon">{{ sk.icon }}</span>
               <h4>{{ sk.name }}</h4>
             </div>
-            <span class="skill-prof-tag gradient-text">{{ sk.proficiency }}%</span>
+            <span class="skill-prof-tag">{{ sk.proficiency }}%</span>
           </div>
           
           <div class="progress-bar-track">
@@ -232,7 +216,7 @@
   </div>
 
   <!-- Professional Experience Timeline -->
-  <section id="journey" class="section-padding timeline-section">
+  <section id="journey" class="section-padding timeline-section section-bg-alt">
     <div class="container">
       <div class="section-header">
         <div class="badge">{{ dict[lang].journeyBadge }}</div>
@@ -243,11 +227,11 @@
       <div class="timeline-container">
         <div class="timeline-item" *ngFor="let item of timeline">
           <div class="timeline-marker">
-            <span>{{ item.icon }}</span>
+            <span>●</span>
           </div>
           <div class="timeline-content glass-panel">
             <div class="timeline-header">
-              <span class="timeline-year gradient-text">{{ item.year }}</span>
+              <span class="timeline-year">{{ item.year }}</span>
               <span class="timeline-tag">{{ lang === 'TH' ? (item.tag_th || item.tag) : item.tag }}</span>
             </div>
             <h3>{{ lang === 'TH' ? (item.title_th || item.title) : item.title }}</h3>
@@ -269,12 +253,10 @@
 
       <div class="vision-mission-grid">
         <div class="vm-card glass-panel">
-          <div class="vm-icon">👁️</div>
           <h3>{{ dict[lang].visionTitle }}</h3>
           <p>{{ lang === 'TH' ? (profile?.vision_th || profile?.vision) : profile?.vision }}</p>
         </div>
         <div class="vm-card glass-panel">
-          <div class="vm-icon">🎯</div>
           <h3>{{ dict[lang].missionTitle }}</h3>
           <p>{{ lang === 'TH' ? (profile?.mission_th || profile?.mission) : profile?.mission }}</p>
         </div>
@@ -282,7 +264,6 @@
 
       <div class="values-grid">
         <div class="value-card glass-panel" *ngFor="let val of profile?.core_values">
-          <div class="value-icon">{{ val.icon }}</div>
           <h4>{{ lang === 'TH' ? (val.title_th || val.title) : val.title }}</h4>
           <p>{{ lang === 'TH' ? (val.description_th || val.description) : val.description }}</p>
         </div>
@@ -290,8 +271,8 @@
     </div>
   </section>
 
-  <!-- Software Engineering Services -->
-  <section id="services" class="section-padding services-section">
+  <!-- Services -->
+  <section id="services" class="section-padding services-section section-bg-alt">
     <div class="container">
       <div class="section-header">
         <div class="badge">{{ dict[lang].servicesBadge }}</div>
@@ -301,7 +282,6 @@
 
       <div class="services-grid">
         <div class="service-card glass-panel" *ngFor="let srv of services">
-          <div class="service-icon">{{ srv.icon }}</div>
           <span class="service-category">{{ srv.category }}</span>
           <h3>{{ lang === 'TH' ? (srv.title_th || srv.title) : srv.title }}</h3>
           <p>{{ lang === 'TH' ? (srv.description_th || srv.description) : srv.description }}</p>
@@ -317,32 +297,6 @@
               </li>
             </ng-container>
           </ul>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Endorsements & Feedback -->
-  <section class="section-padding testimonials-section">
-    <div class="container">
-      <div class="section-header">
-        <div class="badge">{{ dict[lang].testimonialsBadge }}</div>
-        <h2 class="section-title">{{ dict[lang].testimonialsTitle }}</h2>
-      </div>
-
-      <div class="testimonials-grid">
-        <div class="testimonial-card glass-panel" *ngFor="let t of testimonials">
-          <div class="rating-stars">
-            <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
-          </div>
-          <p class="quote">"{{ lang === 'TH' ? (t.quote_th || t.quote) : t.quote }}"</p>
-          <div class="client-meta">
-            <img [src]="t.avatar" [alt]="t.client" class="client-avatar">
-            <div>
-              <div class="client-name">{{ t.client }}</div>
-              <div class="client-company">{{ t.company }} • <span>{{ lang === 'TH' ? (t.project_th || t.project) : t.project }}</span></div>
-            </div>
-          </div>
         </div>
       </div>
     </div>
@@ -372,7 +326,7 @@
   </section>
 
   <!-- Contact Form Section -->
-  <section id="contact" class="section-padding contact-section">
+  <section id="contact" class="section-padding contact-section section-bg-alt">
     <div class="container">
       <div class="contact-box glass-panel">
         <div class="contact-header text-center">
@@ -426,7 +380,7 @@
 <footer class="footer">
   <div class="container footer-container">
     <div class="footer-brand">
-      <div class="brand-name">Phuttiphong <span class="gradient-text">Ratcharak</span></div>
+      <div class="brand-name">Phuttiphong Ratcharak</div>
       <p>{{ dict[lang].footerSub }}</p>
     </div>
 
