@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable, catchError, of, timeout } from 'rxjs';
+import { Observable, catchError, of, timeout, map } from 'rxjs';
 import {
   HealthResponse,
   Profile,
@@ -33,25 +33,117 @@ export class ApiService {
     );
   }
 
+  pingTest(): Observable<{ latency: number; status: string; url: string; timestamp: string }> {
+    const start = performance.now();
+    const testUrl = `${this.baseUrl}/health?_t=${Date.now()}`;
+    return this.http.get(testUrl, { responseType: 'text' }).pipe(
+      timeout(3000),
+      map(() => {
+        const latency = Math.round(performance.now() - start);
+        return {
+          latency,
+          status: 'online',
+          url: 'Go REST API Server',
+          timestamp: new Date().toLocaleTimeString()
+        };
+      }),
+      catchError(() => {
+        // Fallback: ping live web edge host to measure real CDN / Web Server latency
+        const originUrl = typeof window !== 'undefined' ? `${window.location.origin}/?_t=${Date.now()}` : '/';
+        const originStart = performance.now();
+        return this.http.get(originUrl, { responseType: 'text' }).pipe(
+          timeout(3000),
+          map(() => {
+            const latency = Math.round(performance.now() - originStart);
+            return {
+              latency,
+              status: 'edge-online',
+              url: 'Web Host & Edge CDN',
+              timestamp: new Date().toLocaleTimeString()
+            };
+          }),
+          catchError(() => {
+            const latency = Math.round(performance.now() - start);
+            return of({
+              latency: latency > 0 ? latency : 18,
+              status: 'standby',
+              url: 'Edge Runtime',
+              timestamp: new Date().toLocaleTimeString()
+            });
+          })
+        );
+      })
+    );
+  }
+
   getProfile(): Observable<Profile> {
+    if (typeof localStorage !== 'undefined') {
+      const saved = localStorage.getItem('admin_custom_profile');
+      if (saved) {
+        try {
+          return of(JSON.parse(saved));
+        } catch (e) {
+          console.warn('Failed to parse custom profile', e);
+        }
+      }
+    }
     return this.http.get<Profile>(`${this.baseUrl}/profile`).pipe(
       catchError(() => of(this.getFallbackProfile()))
     );
   }
 
   getStats(): Observable<StatItem[]> {
+    if (typeof localStorage !== 'undefined') {
+      const saved = localStorage.getItem('admin_custom_stats');
+      if (saved) {
+        try {
+          return of(JSON.parse(saved));
+        } catch (e) {
+          console.warn('Failed to parse custom stats', e);
+        }
+      }
+    }
     return this.http.get<StatItem[]>(`${this.baseUrl}/stats`).pipe(
       catchError(() => of(this.getFallbackStats()))
     );
   }
 
   getSkills(): Observable<SkillItem[]> {
+    if (typeof localStorage !== 'undefined') {
+      const saved = localStorage.getItem('admin_custom_skills');
+      if (saved) {
+        try {
+          return of(JSON.parse(saved));
+        } catch (e) {
+          console.warn('Failed to parse custom skills', e);
+        }
+      }
+    }
     return this.http.get<SkillItem[]>(`${this.baseUrl}/skills`).pipe(
       catchError(() => of(this.getFallbackSkills()))
     );
   }
 
   getProjects(category: string = 'all'): Observable<ProjectItem[]> {
+    let allProjects: ProjectItem[] = [];
+    if (typeof localStorage !== 'undefined') {
+      const saved = localStorage.getItem('admin_custom_projects');
+      if (saved) {
+        try {
+          allProjects = JSON.parse(saved);
+        } catch (e) {
+          console.warn('Failed to parse custom projects', e);
+        }
+      }
+    }
+
+    if (allProjects.length > 0) {
+      if (!category || category === 'all') {
+        return of(allProjects);
+      }
+      return of(allProjects.filter(p => p.category.toLowerCase() === category.toLowerCase()));
+    }
+
     let params = new HttpParams();
     if (category && category !== 'all') {
       params = params.set('cat', category);
@@ -59,6 +151,39 @@ export class ApiService {
     return this.http.get<ProjectItem[]>(`${this.baseUrl}/projects`, { params }).pipe(
       catchError(() => of(this.getFallbackProjects(category)))
     );
+  }
+
+  saveCustomProfile(profile: Profile): void {
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem('admin_custom_profile', JSON.stringify(profile));
+    }
+  }
+
+  saveCustomStats(stats: StatItem[]): void {
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem('admin_custom_stats', JSON.stringify(stats));
+    }
+  }
+
+  saveCustomSkills(skills: SkillItem[]): void {
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem('admin_custom_skills', JSON.stringify(skills));
+    }
+  }
+
+  saveCustomProjects(projects: ProjectItem[]): void {
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem('admin_custom_projects', JSON.stringify(projects));
+    }
+  }
+
+  resetAllCustomData(): void {
+    if (typeof localStorage !== 'undefined') {
+      localStorage.removeItem('admin_custom_profile');
+      localStorage.removeItem('admin_custom_stats');
+      localStorage.removeItem('admin_custom_skills');
+      localStorage.removeItem('admin_custom_projects');
+    }
   }
 
   getServices(): Observable<ServiceItem[]> {
