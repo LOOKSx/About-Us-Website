@@ -12,7 +12,9 @@ import {
   TestimonialItem,
   FAQItem,
   ContactSubmission,
-  ContactResponse
+  ContactResponse,
+  UserAccount,
+  AuthResponse
 } from '../models/api.models';
 
 @Injectable({
@@ -183,7 +185,169 @@ export class ApiService {
       localStorage.removeItem('admin_custom_stats');
       localStorage.removeItem('admin_custom_skills');
       localStorage.removeItem('admin_custom_projects');
+      localStorage.removeItem('nexus_registered_users');
+      localStorage.removeItem('admin_master_password');
     }
+  }
+
+  /* --- Multi-User Authentication & Account Management --- */
+  getDefaultUsers(): UserAccount[] {
+    return [
+      {
+        id: 'usr-admin-1',
+        name: 'ผู้ดูแลระบบ (Super Admin)',
+        username: 'admin',
+        email: 'admin@phuttiphong.com',
+        password: 'admin1234',
+        role: 'admin',
+        created_at: '2026-07-19T00:00:00Z',
+        last_login: new Date().toISOString()
+      },
+      {
+        id: 'usr-owner-2',
+        name: 'พุฒิพงศ์ ราชรักษ์ (Owner)',
+        username: 'phuttiphong',
+        email: 'phuttiphong.ratcharak@example.com',
+        password: 'phuttiphong2026',
+        role: 'admin',
+        created_at: '2026-07-19T00:00:00Z'
+      }
+    ];
+  }
+
+  getUsers(): UserAccount[] {
+    if (typeof localStorage !== 'undefined') {
+      const saved = localStorage.getItem('nexus_registered_users');
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            return parsed;
+          }
+        } catch (e) {
+          console.warn('Failed to parse users', e);
+        }
+      }
+      const defaults = this.getDefaultUsers();
+      localStorage.setItem('nexus_registered_users', JSON.stringify(defaults));
+      return defaults;
+    }
+    return this.getDefaultUsers();
+  }
+
+  saveUsers(users: UserAccount[]): void {
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem('nexus_registered_users', JSON.stringify(users));
+    }
+  }
+
+  registerUser(payload: { name: string; username: string; email: string; password: string; role?: 'admin' | 'member' }): AuthResponse {
+    const users = this.getUsers();
+    const cleanUsername = payload.username.trim().toLowerCase();
+    const cleanEmail = payload.email.trim().toLowerCase();
+
+    // Check existing
+    const exists = users.some(u => 
+      u.username.toLowerCase() === cleanUsername || 
+      u.email.toLowerCase() === cleanEmail
+    );
+
+    if (exists) {
+      return {
+        success: false,
+        message: 'ชื่อผู้ใช้ (Username) หรืออีเมลนี้ มีในระบบแล้ว กรุณาใช้ชื่ออื่น'
+      };
+    }
+
+    const newUser: UserAccount = {
+      id: 'usr-' + Date.now(),
+      name: payload.name.trim() || payload.username.trim(),
+      username: payload.username.trim(),
+      email: payload.email.trim(),
+      password: payload.password,
+      role: payload.role || 'member',
+      created_at: new Date().toISOString(),
+      last_login: new Date().toISOString()
+    };
+
+    users.push(newUser);
+    this.saveUsers(users);
+
+    return {
+      success: true,
+      message: `ลงทะเบียนสำเร็จ! ยินดีต้อนรับคุณ ${newUser.name}`,
+      user: newUser
+    };
+  }
+
+  authenticateUser(identifier: string, pass: string): AuthResponse {
+    const users = this.getUsers();
+    const cleanId = identifier.trim().toLowerCase();
+
+    // 1. Direct match with stored users
+    const matched = users.find(u => 
+      (u.username.toLowerCase() === cleanId || u.email.toLowerCase() === cleanId) &&
+      u.password === pass
+    );
+
+    if (matched) {
+      matched.last_login = new Date().toISOString();
+      this.saveUsers(users);
+      return {
+        success: true,
+        message: `เข้าสู่ระบบสำเร็จ ยินดีต้อนรับ ${matched.name}!`,
+        user: matched
+      };
+    }
+
+    // 2. Compatibility check: if user only typed password, or master passcode
+    const masterPass = typeof localStorage !== 'undefined' ? localStorage.getItem('admin_master_password') || 'admin1234' : 'admin1234';
+    if ((cleanId === 'admin' || cleanId === '') && pass === masterPass) {
+      const adminUser = users.find(u => u.username === 'admin') || users[0];
+      return {
+        success: true,
+        message: 'เข้าสู่ระบบด้วยรหัสผ่านผู้ดูแลระบบ (Master Passcode) สำเร็จ!',
+        user: adminUser
+      };
+    }
+
+    return {
+      success: false,
+      message: 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง กรุณาตรวจสอบอีกครั้ง'
+    };
+  }
+
+  deleteUser(id: string): { success: boolean; message: string } {
+    let users = this.getUsers();
+    if (users.length <= 1) {
+      return { success: false, message: 'ไม่สามารถลบบัญชีผู้ใช้สุดท้ายของระบบได้' };
+    }
+    const target = users.find(u => u.id === id);
+    if (!target) {
+      return { success: false, message: 'ไม่พบบัญชีนี้ในระบบ' };
+    }
+    if (target.username === 'admin') {
+      return { success: false, message: 'ไม่อนุญาตให้ลบบัญชี Super Admin หลัก' };
+    }
+    users = users.filter(u => u.id !== id);
+    this.saveUsers(users);
+    return { success: true, message: `ลบบัญชี ${target.username} สำเร็จเรียบร้อย` };
+  }
+
+  updateUserPassword(id: string, newPass: string): { success: boolean; message: string } {
+    const users = this.getUsers();
+    const target = users.find(u => u.id === id);
+    if (!target) {
+      return { success: false, message: 'ไม่พบบัญชีนี้ในระบบ' };
+    }
+    target.password = newPass;
+    this.saveUsers(users);
+
+    if (target.username === 'admin' && typeof localStorage !== 'undefined') {
+      localStorage.setItem('admin_master_password', newPass);
+    }
+
+    return { success: true, message: `เปลี่ยนรหัสผ่านของ ${target.username} สำเร็จแล้ว` };
   }
 
   getServices(): Observable<ServiceItem[]> {

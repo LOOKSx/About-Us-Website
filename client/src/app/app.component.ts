@@ -12,7 +12,9 @@ import {
   TimelineItem,
   TestimonialItem,
   FAQItem,
-  ContactSubmission
+  ContactSubmission,
+  UserAccount,
+  AuthResponse
 } from './models/api.models';
 import { Subscription, interval } from 'rxjs';
 
@@ -74,15 +76,45 @@ export class AppComponent implements OnInit, OnDestroy {
   contactErrorMessage = '';
 
   // ==========================================
-  // Secret Admin Portal & Diagnostics State
+  // Secret Admin Portal & Multi-User Authentication State
   // ==========================================
   showPasscodeModal = false;
+  showAuthModal = false;
   showAdminModal = false;
   isAdminAuthenticated = false;
-  passcodeInput = '';
+  currentUser: UserAccount | null = null;
+  userAccountsList: UserAccount[] = [];
+  authModalTab: 'login' | 'register' | 'accounts' = 'login';
+
+  // Login Form
+  loginForm = {
+    identifier: '',
+    password: '',
+    rememberMe: true
+  };
+  loginError = '';
+  loginSuccess = '';
   showPasswordText = false;
+
+  // Register Form
+  registerForm = {
+    name: '',
+    username: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
+    role: 'member' as 'admin' | 'member'
+  };
+  registerError = '';
+  registerSuccess = '';
+  showRegisterPasswordText = false;
+
+  // Reveal password map for account list
+  showAccountPasswords: { [id: string]: boolean } = {};
+
+  passcodeInput = '';
   passcodeError = '';
-  currentAdminTab: 'diagnostics' | 'profile' | 'projects' | 'skills' | 'stats' | 'security' = 'diagnostics';
+  currentAdminTab: 'diagnostics' | 'profile' | 'projects' | 'skills' | 'stats' | 'security' | 'users' = 'diagnostics';
 
   // Diagnostic & Latency Metrics
   isPinging = false;
@@ -277,8 +309,22 @@ export class AppComponent implements OnInit, OnDestroy {
       if (savedTheme === 'light' || savedTheme === 'dark') {
         this.theme = savedTheme;
       }
+
+      // Load saved user session
+      const savedUser = localStorage.getItem('nexus_current_user');
+      if (savedUser) {
+        try {
+          this.currentUser = JSON.parse(savedUser);
+          if (this.currentUser && this.currentUser.role === 'admin') {
+            this.isAdminAuthenticated = true;
+          }
+        } catch (e) {
+          console.warn('Failed to parse current user session', e);
+        }
+      }
     }
     this.applyTheme();
+    this.refreshUsersList();
 
     this.checkHealth();
     this.healthSub = interval(10000).subscribe(() => this.checkHealth());
@@ -401,8 +447,185 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   // ==========================================
-  // Secret Passcode Authentication Methods
+  // 🔐 Authentication & Multi-User Account Methods
   // ==========================================
+  refreshUsersList(): void {
+    this.userAccountsList = this.apiService.getUsers();
+  }
+
+  openAuthModal(tab: 'login' | 'register' | 'accounts' = 'login'): void {
+    if (this.mobileMenuOpen) {
+      this.mobileMenuOpen = false;
+    }
+    this.refreshUsersList();
+    this.authModalTab = tab;
+    this.loginError = '';
+    this.loginSuccess = '';
+    this.registerError = '';
+    this.registerSuccess = '';
+    this.showAuthModal = true;
+  }
+
+  closeAuthModal(): void {
+    this.showAuthModal = false;
+    this.loginError = '';
+    this.loginSuccess = '';
+    this.registerError = '';
+    this.registerSuccess = '';
+  }
+
+  switchAuthTab(tab: 'login' | 'register' | 'accounts'): void {
+    this.authModalTab = tab;
+    this.refreshUsersList();
+    this.loginError = '';
+    this.loginSuccess = '';
+    this.registerError = '';
+    this.registerSuccess = '';
+  }
+
+  quickFillLogin(username: string, pass: string): void {
+    this.loginForm.identifier = username;
+    this.loginForm.password = pass;
+    this.loginError = '';
+    this.executeLogin();
+  }
+
+  togglePasswordVisibility(): void {
+    this.showPasswordText = !this.showPasswordText;
+  }
+
+  toggleRegisterPasswordVisibility(): void {
+    this.showRegisterPasswordText = !this.showRegisterPasswordText;
+  }
+
+  toggleAccountPasswordReveal(id: string): void {
+    this.showAccountPasswords[id] = !this.showAccountPasswords[id];
+  }
+
+  executeLogin(): void {
+    this.loginError = '';
+    this.loginSuccess = '';
+
+    if (!this.loginForm.identifier || !this.loginForm.password) {
+      this.loginError = 'กรุณากรอกชื่อผู้ใช้/อีเมล และรหัสผ่านให้ครบถ้วน';
+      return;
+    }
+
+    const res = this.apiService.authenticateUser(this.loginForm.identifier, this.loginForm.password);
+    if (res.success && res.user) {
+      this.currentUser = res.user;
+      this.loginSuccess = res.message;
+      if (this.currentUser.role === 'admin') {
+        this.isAdminAuthenticated = true;
+      }
+      if (typeof localStorage !== 'undefined' && this.loginForm.rememberMe) {
+        localStorage.setItem('nexus_current_user', JSON.stringify(res.user));
+      }
+      this.refreshUsersList();
+
+      setTimeout(() => {
+        this.closeAuthModal();
+        if (this.currentUser?.role === 'admin') {
+          this.openAdminPortal();
+        }
+      }, 700);
+    } else {
+      this.loginError = res.message;
+    }
+  }
+
+  executeRegister(): void {
+    this.registerError = '';
+    this.registerSuccess = '';
+
+    if (!this.registerForm.username || !this.registerForm.email || !this.registerForm.password) {
+      this.registerError = 'กรุณากรอกข้อมูลที่จำเป็นให้ครบถ้วน (ชื่อผู้ใช้, อีเมล, รหัสผ่าน)';
+      return;
+    }
+
+    if (this.registerForm.password.length < 4) {
+      this.registerError = 'รหัสผ่านต้องมีความยาวอย่างน้อย 4 ตัวอักษร';
+      return;
+    }
+
+    if (this.registerForm.password !== this.registerForm.confirmPassword) {
+      this.registerError = 'รหัสผ่านและยืนยันรหัสผ่านไม่ตรงกัน';
+      return;
+    }
+
+    const res = this.apiService.registerUser({
+      name: this.registerForm.name || this.registerForm.username,
+      username: this.registerForm.username,
+      email: this.registerForm.email,
+      password: this.registerForm.password,
+      role: this.registerForm.role
+    });
+
+    if (res.success && res.user) {
+      this.registerSuccess = res.message;
+      this.currentUser = res.user;
+      if (this.currentUser.role === 'admin') {
+        this.isAdminAuthenticated = true;
+      }
+      if (typeof localStorage !== 'undefined') {
+        localStorage.setItem('nexus_current_user', JSON.stringify(res.user));
+      }
+      this.refreshUsersList();
+
+      this.registerForm = {
+        name: '',
+        username: '',
+        email: '',
+        password: '',
+        confirmPassword: '',
+        role: 'member'
+      };
+
+      setTimeout(() => {
+        this.closeAuthModal();
+        if (this.currentUser?.role === 'admin') {
+          this.openAdminPortal();
+        }
+      }, 1000);
+    } else {
+      this.registerError = res.message;
+    }
+  }
+
+  logoutUser(): void {
+    this.currentUser = null;
+    this.isAdminAuthenticated = false;
+    this.showAdminModal = false;
+    if (typeof localStorage !== 'undefined') {
+      localStorage.removeItem('nexus_current_user');
+    }
+  }
+
+  deleteUserAccount(id: string): void {
+    if (confirm('ต้องการลบบัญชีนี้ออกจากระบบใช่หรือไม่?')) {
+      const res = this.apiService.deleteUser(id);
+      if (res.success) {
+        this.refreshUsersList();
+        if (this.currentUser?.id === id) {
+          this.logoutUser();
+        }
+      } else {
+        alert(res.message);
+      }
+    }
+  }
+
+  // Backward compatibility with keypad
+  appendPasscode(digit: string): void {
+    if (this.loginForm.password.length < 20) {
+      this.loginForm.password += digit;
+    }
+  }
+
+  clearPasscode(): void {
+    this.loginForm.password = '';
+  }
+
   private getMasterPassword(): string {
     if (typeof localStorage !== 'undefined') {
       return localStorage.getItem('admin_master_password') || 'admin1234';
@@ -415,59 +638,17 @@ export class AppComponent implements OnInit, OnDestroy {
       this.mobileMenuOpen = false;
     }
 
-    if (this.isAdminAuthenticated) {
+    if (this.isAdminAuthenticated && this.currentUser?.role === 'admin') {
       this.prepareEditCopies();
       this.showAdminModal = true;
       this.runDiagnosticsTest();
     } else {
-      this.passcodeInput = '';
-      this.passcodeError = '';
-      this.showPasscodeModal = true;
-    }
-  }
-
-  closePasscodeModal(): void {
-    this.showPasscodeModal = false;
-    this.passcodeInput = '';
-    this.passcodeError = '';
-  }
-
-  togglePasswordVisibility(): void {
-    this.showPasswordText = !this.showPasswordText;
-  }
-
-  appendPasscode(digit: string): void {
-    if (this.passcodeInput.length < 20) {
-      this.passcodeInput += digit;
-      this.passcodeError = '';
-    }
-  }
-
-  clearPasscode(): void {
-    this.passcodeInput = '';
-    this.passcodeError = '';
-  }
-
-  verifyPasscode(): void {
-    const masterPass = this.getMasterPassword();
-    if (this.passcodeInput === masterPass) {
-      this.isAdminAuthenticated = true;
-      this.showPasscodeModal = false;
-      this.passcodeInput = '';
-      this.passcodeError = '';
-      this.prepareEditCopies();
-      this.showAdminModal = true;
-      this.runDiagnosticsTest();
-    } else {
-      this.passcodeError = this.lang === 'TH'
-        ? '⚠️ รหัสผ่านไม่ถูกต้อง! กรุณาลองใหม่อีกครั้ง (ค่าเริ่มต้น: admin1234)'
-        : '⚠️ Incorrect password! Please try again (Default: admin1234)';
+      this.openAuthModal('login');
     }
   }
 
   logoutAdmin(): void {
-    this.isAdminAuthenticated = false;
-    this.showAdminModal = false;
+    this.logoutUser();
     this.adminAlertMessage = '';
   }
 
@@ -476,11 +657,14 @@ export class AppComponent implements OnInit, OnDestroy {
     this.adminAlertMessage = '';
   }
 
-  switchAdminTab(tab: 'diagnostics' | 'profile' | 'projects' | 'skills' | 'stats' | 'security'): void {
+  switchAdminTab(tab: 'diagnostics' | 'profile' | 'projects' | 'skills' | 'stats' | 'security' | 'users'): void {
     this.currentAdminTab = tab;
     this.adminAlertMessage = '';
     if (tab === 'diagnostics') {
       this.runDiagnosticsTest();
+    }
+    if (tab === 'users') {
+      this.refreshUsersList();
     }
   }
 

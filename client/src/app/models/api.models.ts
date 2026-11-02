@@ -142,3 +142,21 @@ export interface ContactResponse {
     created_at: string;
   };
 }
+
+export interface UserAccount {
+  id: string;
+  name: string;
+  username: string;
+  email: string;
+  password: string;
+  role: 'admin' | 'member';
+  created_at: string;
+  last_login?: string;
+}
+
+export interface AuthResponse {
+  success: boolean;
+  message: string;
+  user?: UserAccount;
+  token?: string;
+}

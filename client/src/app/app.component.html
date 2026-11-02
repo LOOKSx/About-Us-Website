@@ -22,11 +22,23 @@
     </nav>
 
     <div class="nav-actions">
-      <!-- Secret Admin Entrance Pill -->
-      <button class="admin-entry-btn" (click)="openAdminPortal()" title="เข้าสู่ระบบผู้ดูแลระบบ (Admin Portal)">
-        <span>🔐</span>
-        <span class="admin-entry-label">{{ isAdminAuthenticated ? (lang === 'TH' ? 'แอดมิน (เปิด)' : 'Admin (Unlocked)') : (lang === 'TH' ? 'แอดมิน' : 'Admin') }}</span>
-      </button>
+      <!-- User Auth State Pill -->
+      <ng-container *ngIf="currentUser">
+        <button class="admin-entry-btn active-user" (click)="currentUser.role === 'admin' ? openAdminPortal() : openAuthModal('accounts')" [title]="currentUser.role === 'admin' ? 'เปิดศูนย์ควบคุมผู้ดูแลระบบ' : 'ดูข้อมูลบัญชีผู้ใช้'">
+          <span>{{ currentUser.role === 'admin' ? '👑' : '👤' }}</span>
+          <span class="admin-entry-label">{{ currentUser.name }} ({{ currentUser.role === 'admin' ? 'Admin' : 'Member' }})</span>
+        </button>
+        <button class="btn-logout-pill" (click)="logoutUser()" title="ออกจากระบบ">
+          <span>🚪 ออก</span>
+        </button>
+      </ng-container>
+
+      <ng-container *ngIf="!currentUser">
+        <button class="admin-entry-btn" (click)="openAuthModal('login')" title="เข้าสู่ระบบ หรือ ลงทะเบียน">
+          <span>🔐</span>
+          <span class="admin-entry-label">เข้าสู่ระบบ / ลงทะเบียน</span>
+        </button>
+      </ng-container>
 
       <!-- Theme Switcher Pill -->
       <button class="theme-toggle-btn" (click)="toggleTheme()" title="Switch Theme Color (Light / Dark)">
@@ -49,9 +61,15 @@
   <!-- Mobile Drawer Menu -->
   <div class="mobile-drawer glass-panel" [class.open]="mobileMenuOpen">
     <div class="mobile-drawer-header">
-      <span>🔐 แอดมิน:</span>
-      <button class="admin-entry-btn sm" (click)="openAdminPortal()">
-        <span>{{ isAdminAuthenticated ? 'แผงควบคุม (เปิดแล้ว)' : 'เข้าสู่ระบบแอดมิน' }}</span>
+      <span>🔐 บัญชีผู้ใช้:</span>
+      <div class="d-flex gap-1" *ngIf="currentUser">
+        <button class="admin-entry-btn sm active-user" (click)="currentUser.role === 'admin' ? openAdminPortal() : openAuthModal('accounts')">
+          <span>{{ currentUser.role === 'admin' ? '👑' : '👤' }} {{ currentUser.name }}</span>
+        </button>
+        <button class="btn-logout-pill sm" (click)="logoutUser()">🚪 ออก</button>
+      </div>
+      <button class="admin-entry-btn sm" *ngIf="!currentUser" (click)="openAuthModal('login')">
+        <span>🔐 เข้าสู่ระบบ / ลงทะเบียน</span>
       </button>
     </div>
     <div class="mobile-drawer-header">
@@ -414,7 +432,7 @@
       <a href="#projects">{{ dict[lang].navProjects }}</a>
       <a href="#journey">{{ dict[lang].navJourney }}</a>
       <a href="#faq">{{ dict[lang].navFaq }}</a>
-      <a (click)="openAdminPortal()" class="footer-admin-link">🔐 แอดมิน & ตรวจสอบระบบ</a>
+      <a (click)="openAuthModal('login')" class="footer-admin-link">🔐 เข้าสู่ระบบ / ลงทะเบียน & ตรวจสอบระบบ</a>
     </div>
 
     <div class="footer-copyright">
@@ -424,65 +442,254 @@
 </footer>
 
 <!-- ======================================================== -->
-<!-- 🔐 Secret Passcode Modal (หน้าเข้ารหัสลับ) -->
+<!-- 🔐 Authentication & Registration Modal (เข้าสู่ระบบ & ลงทะเบียน) -->
 <!-- ======================================================== -->
-<div class="modal-backdrop" *ngIf="showPasscodeModal" (click)="closePasscodeModal()">
-  <div class="modal-content passcode-modal glass-panel" (click)="$event.stopPropagation()">
-    <button class="modal-close" (click)="closePasscodeModal()">✕</button>
+<div class="modal-backdrop" *ngIf="showAuthModal" (click)="closeAuthModal()">
+  <div class="modal-content auth-modal glass-panel" (click)="$event.stopPropagation()">
+    <button class="modal-close" (click)="closeAuthModal()">✕</button>
 
-    <div class="passcode-header text-center">
+    <div class="auth-header text-center">
       <div class="passcode-icon">🔐</div>
-      <h2 class="passcode-title">เข้าสู่ระบบแอดมิน</h2>
-      <p class="passcode-sub">กรุณากรอกรหัสผ่านเพื่อปลดล็อคการจัดการและตรวจสอบความเสถียร</p>
+      <h2 class="auth-title">
+        {{ authModalTab === 'login' ? 'เข้าสู่ระบบ (Sign In)' : (authModalTab === 'register' ? 'ลงทะเบียนบัญชีใหม่ (Register)' : 'รายชื่อรหัส & บัญชีทั้งหมด') }}
+      </h2>
+      <p class="auth-sub">
+        {{ authModalTab === 'login' ? 'เข้าสู่ระบบเพื่อจัดการเนื้อหาเว็บไซต์หรือตรวจสอบความเสถียรของเซิร์ฟเวอร์' : (authModalTab === 'register' ? 'สร้างบัญชีผู้ใช้งานใหม่เพื่อเข้าถึงฟีเจอร์ในระบบ' : 'สรุปบัญชีและรหัสผ่านทั้งหมดที่ใช้งานได้ในระบบปัจจุบัน') }}
+      </p>
     </div>
 
-    <form (ngSubmit)="verifyPasscode()" class="passcode-form">
-      <div class="passcode-input-wrapper">
+    <!-- Auth Tabs Switcher -->
+    <div class="auth-tabs">
+      <button class="auth-tab-btn" [class.active]="authModalTab === 'login'" (click)="switchAuthTab('login')">
+        🔑 เข้าสู่ระบบ
+      </button>
+      <button class="auth-tab-btn" [class.active]="authModalTab === 'register'" (click)="switchAuthTab('register')">
+        📝 ลงทะเบียนใหม่
+      </button>
+      <button class="auth-tab-btn" [class.active]="authModalTab === 'accounts'" (click)="switchAuthTab('accounts')">
+        📋 รายการรหัสทั้งหมด ({{ userAccountsList.length }})
+      </button>
+    </div>
+
+    <!-- Alert Notifications -->
+    <div class="alert alert-danger" *ngIf="loginError && authModalTab === 'login'">
+      ⚠️ {{ loginError }}
+    </div>
+    <div class="alert alert-success" *ngIf="loginSuccess && authModalTab === 'login'">
+      ✅ {{ loginSuccess }}
+    </div>
+
+    <div class="alert alert-danger" *ngIf="registerError && authModalTab === 'register'">
+      ⚠️ {{ registerError }}
+    </div>
+    <div class="alert alert-success" *ngIf="registerSuccess && authModalTab === 'register'">
+      🎉 {{ registerSuccess }}
+    </div>
+
+    <!-- Tab 1: Login Form -->
+    <form *ngIf="authModalTab === 'login'" (ngSubmit)="executeLogin()" class="auth-form">
+      <div class="form-group">
+        <label>ชื่อผู้ใช้ (Username) หรือ อีเมล (Email):</label>
         <input 
-          [type]="showPasswordText ? 'text' : 'password'" 
-          [(ngModel)]="passcodeInput" 
-          name="passcode" 
-          placeholder="กรอกรหัสผ่าน..." 
-          class="passcode-input"
-          autocomplete="current-password"
-          autofocus>
-        <button type="button" class="btn-toggle-eye" (click)="togglePasswordVisibility()">
-          {{ showPasswordText ? '🙈 ซ่อน' : '👁️ ดู' }}
-        </button>
+          type="text" 
+          [(ngModel)]="loginForm.identifier" 
+          name="identifier" 
+          placeholder="เช่น admin หรือ admin@phuttiphong.com" 
+          class="form-input" 
+          required 
+          autocomplete="username">
       </div>
 
-      <div class="passcode-keypad">
-        <button type="button" class="keypad-btn" (click)="appendPasscode('1')">1</button>
-        <button type="button" class="keypad-btn" (click)="appendPasscode('2')">2</button>
-        <button type="button" class="keypad-btn" (click)="appendPasscode('3')">3</button>
-        <button type="button" class="keypad-btn" (click)="appendPasscode('4')">4</button>
-        <button type="button" class="keypad-btn" (click)="appendPasscode('5')">5</button>
-        <button type="button" class="keypad-btn" (click)="appendPasscode('6')">6</button>
-        <button type="button" class="keypad-btn" (click)="appendPasscode('7')">7</button>
-        <button type="button" class="keypad-btn" (click)="appendPasscode('8')">8</button>
-        <button type="button" class="keypad-btn" (click)="appendPasscode('9')">9</button>
-        <button type="button" class="keypad-btn text-danger" (click)="clearPasscode()">ล้าง</button>
-        <button type="button" class="keypad-btn" (click)="appendPasscode('0')">0</button>
-        <button type="submit" class="keypad-btn keypad-enter">ตกลง</button>
+      <div class="form-group">
+        <label>รหัสผ่าน (Password):</label>
+        <div class="passcode-input-wrapper">
+          <input 
+            [type]="showPasswordText ? 'text' : 'password'" 
+            [(ngModel)]="loginForm.password" 
+            name="password" 
+            placeholder="กรอกรหัสผ่านของคุณ..." 
+            class="form-input" 
+            required 
+            autocomplete="current-password">
+          <button type="button" class="btn-toggle-eye" (click)="togglePasswordVisibility()">
+            {{ showPasswordText ? '🙈 ซ่อน' : '👁️ ดู' }}
+          </button>
+        </div>
       </div>
 
-      <div class="passcode-hint-box">
-        💡 <strong>รหัสผ่านเริ่มต้นของระบบ:</strong> <code>admin1234</code>
+      <!-- Quick Login Shortcut Buttons -->
+      <div class="quick-login-box">
+        <span class="quick-login-title">⚡ บัญชีเริ่มต้นสำหรับเข้าสู่ระบบด่วน:</span>
+        <div class="quick-login-pills">
+          <button type="button" class="quick-pill" (click)="quickFillLogin('admin', 'admin1234')">
+            👑 Super Admin (admin / admin1234)
+          </button>
+          <button type="button" class="quick-pill" (click)="quickFillLogin('phuttiphong', 'phuttiphong2026')">
+            👤 Owner (phuttiphong / phuttiphong2026)
+          </button>
+        </div>
       </div>
 
-      <div class="alert alert-danger" *ngIf="passcodeError">
-        {{ passcodeError }}
-      </div>
-
-      <div class="passcode-actions">
+      <div class="auth-actions">
         <button type="submit" class="btn btn-primary btn-block">
-          🔓 ปลดล็อคเข้าสู่ระบบ
+          🔓 เข้าสู่ระบบ (Log In)
         </button>
-        <button type="button" class="btn btn-outline btn-block" (click)="closePasscodeModal()">
-          ยกเลิก
-        </button>
+      </div>
+
+      <div class="auth-footer-links text-center">
+        <span>ยังไม่มีบัญชีผู้ใช้? </span>
+        <a class="auth-link" (click)="switchAuthTab('register')">ลงทะเบียนสมัครสมาชิกที่นี่</a>
+        <div class="mt-2">
+          <a class="auth-link-subtle" (click)="switchAuthTab('accounts')">🔍 ตรวจสอบว่าในระบบมีรหัสผ่านกี่อัน</a>
+        </div>
       </div>
     </form>
+
+    <!-- Tab 2: Register Form -->
+    <form *ngIf="authModalTab === 'register'" (ngSubmit)="executeRegister()" class="auth-form">
+      <div class="form-group">
+        <label>ชื่อ-นามสกุล (Full Name):</label>
+        <input 
+          type="text" 
+          [(ngModel)]="registerForm.name" 
+          name="regName" 
+          placeholder="เช่น พุฒิพงศ์ หรือ John Doe" 
+          class="form-input" 
+          required>
+      </div>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label>ชื่อผู้ใช้ (Username): *</label>
+          <input 
+            type="text" 
+            [(ngModel)]="registerForm.username" 
+            name="regUsername" 
+            placeholder="เช่น user2026" 
+            class="form-input" 
+            required>
+        </div>
+        <div class="form-group">
+          <label>อีเมล (Email): *</label>
+          <input 
+            type="email" 
+            [(ngModel)]="registerForm.email" 
+            name="regEmail" 
+            placeholder="user@example.com" 
+            class="form-input" 
+            required>
+        </div>
+      </div>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label>รหัสผ่าน (Password): *</label>
+          <div class="passcode-input-wrapper">
+            <input 
+              [type]="showRegisterPasswordText ? 'text' : 'password'" 
+              [(ngModel)]="registerForm.password" 
+              name="regPassword" 
+              placeholder="รหัสผ่านอย่างน้อย 4 ตัว..." 
+              class="form-input" 
+              required>
+            <button type="button" class="btn-toggle-eye" (click)="toggleRegisterPasswordVisibility()">
+              {{ showRegisterPasswordText ? '🙈' : '👁️' }}
+            </button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>ยืนยันรหัสผ่าน: *</label>
+          <input 
+            type="password" 
+            [(ngModel)]="registerForm.confirmPassword" 
+            name="regConfirmPassword" 
+            placeholder="ยืนยันรหัสผ่านอีกครั้ง..." 
+            class="form-input" 
+            required>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>บทบาทผู้ใช้งาน (Role):</label>
+        <select [(ngModel)]="registerForm.role" name="regRole" class="form-input">
+          <option value="member">👤 สมาชิกทั่วไป (Member)</option>
+          <option value="admin">👑 ผู้ดูแลระบบ (Admin)</option>
+        </select>
+      </div>
+
+      <div class="auth-actions">
+        <button type="submit" class="btn btn-primary btn-block">
+          📝 ยืนยันการลงทะเบียน (Register)
+        </button>
+      </div>
+
+      <div class="auth-footer-links text-center">
+        <span>มีบัญชีผู้ใช้อยู่แล้ว? </span>
+        <a class="auth-link" (click)="switchAuthTab('login')">เข้าสู่ระบบที่นี่</a>
+      </div>
+    </form>
+
+    <!-- Tab 3: Accounts & Passwords List (มีกี่อัน) -->
+    <div *ngIf="authModalTab === 'accounts'" class="accounts-summary-wrapper">
+      <div class="accounts-counter-badge">
+        <span>📊 ขณะนี้ในระบบมีบัญชีและรหัสผ่านทั้งหมด <strong>{{ userAccountsList.length }}</strong> บัญชี</span>
+      </div>
+
+      <div class="accounts-cards-list">
+        <div class="account-card glass-panel" *ngFor="let acc of userAccountsList">
+          <div class="account-card-header">
+            <div class="account-user-info">
+              <span class="account-avatar-emoji">{{ acc.role === 'admin' ? '👑' : '👤' }}</span>
+              <div>
+                <strong class="account-name">{{ acc.name }}</strong>
+                <span class="account-role-tag" [class.admin]="acc.role === 'admin'">{{ acc.role === 'admin' ? 'Admin' : 'Member' }}</span>
+                <div class="account-meta text-muted">&#64;{{ acc.username }} • {{ acc.email }}</div>
+              </div>
+            </div>
+            <div class="account-actions-row">
+              <button 
+                class="btn btn-sm btn-outline" 
+                (click)="quickFillLogin(acc.username, acc.password)"
+                title="เข้าสู่ระบบด้วยบัญชีนี้ทันที">
+                ⚡ ล็อกอินทันที
+              </button>
+              <button 
+                *ngIf="acc.username !== 'admin'" 
+                class="btn btn-sm btn-outline text-danger" 
+                (click)="deleteUserAccount(acc.id)"
+                title="ลบบัญชีนี้">
+                🗑️
+              </button>
+            </div>
+          </div>
+
+          <div class="account-card-body">
+            <div class="password-display-box">
+              <span class="pwd-label">🔑 รหัสผ่าน (Password):</span>
+              <span class="pwd-val font-mono">
+                {{ showAccountPasswords[acc.id] ? acc.password : '••••••••' }}
+              </span>
+              <button type="button" class="btn-pwd-eye" (click)="toggleAccountPasswordReveal(acc.id)">
+                {{ showAccountPasswords[acc.id] ? '🙈 ซ่อน' : '👁️ ดูรหัส' }}
+              </button>
+            </div>
+            <div class="account-created-at text-muted">
+              📅 สร้างเมื่อ: {{ acc.created_at | date:'mediumDate' }}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="accounts-footer-actions text-center">
+        <button class="btn btn-outline" (click)="switchAuthTab('register')">
+          ➕ ลงทะเบียนเพิ่มบัญชีใหม่
+        </button>
+        <button class="btn btn-primary" (click)="switchAuthTab('login')">
+          🔑 เข้าสู่ระบบ
+        </button>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -532,6 +739,9 @@
       </button>
       <button class="admin-tab-btn" [class.active]="currentAdminTab === 'stats'" (click)="switchAdminTab('stats')">
         📊 ตัวเลขสถิติ
+      </button>
+      <button class="admin-tab-btn" [class.active]="currentAdminTab === 'users'" (click)="switchAdminTab('users')">
+        👥 บัญชี & รหัสทั้งหมด ({{ userAccountsList.length }})
       </button>
       <button class="admin-tab-btn" [class.active]="currentAdminTab === 'security'" (click)="switchAdminTab('security')">
         🔑 ความปลอดภัย & รหัสผ่าน
@@ -880,6 +1090,64 @@
 
       <div class="admin-save-footer">
         <button class="btn btn-primary" (click)="saveStatsEdits()">💾 บันทึกตัวเลขสถิติทั้งหมด</button>
+      </div>
+    </div>
+
+    <!-- Tab: User Accounts & Passwords Manager in Admin -->
+    <div class="admin-tab-content" *ngIf="currentAdminTab === 'users'">
+      <div class="diag-header-row">
+        <div>
+          <h3>👥 จัดการบัญชีผู้ใช้และรหัสผ่านทั้งหมดในระบบ</h3>
+          <p class="text-muted">ตรวจสอบบัญชีที่ลงทะเบียนไว้ ดูรหัสผ่าน เปลี่ยนรหัสผ่าน หรือลบบัญชีผู้ใช้</p>
+        </div>
+        <button class="btn btn-primary" (click)="openAuthModal('register')">
+          ➕ ลงทะเบียนบัญชีใหม่
+        </button>
+      </div>
+
+      <div class="accounts-summary-wrapper">
+        <div class="accounts-counter-badge">
+          <span>📊 ขณะนี้ในระบบมีบัญชีและรหัสผ่านทั้งหมด <strong>{{ userAccountsList.length }}</strong> บัญชี</span>
+        </div>
+
+        <div class="accounts-cards-list">
+          <div class="account-card glass-panel" *ngFor="let acc of userAccountsList">
+            <div class="account-card-header">
+              <div class="account-user-info">
+                <span class="account-avatar-emoji">{{ acc.role === 'admin' ? '👑' : '👤' }}</span>
+                <div>
+                  <strong class="account-name">{{ acc.name }}</strong>
+                  <span class="account-role-tag" [class.admin]="acc.role === 'admin'">{{ acc.role === 'admin' ? 'Admin' : 'Member' }}</span>
+                  <div class="account-meta text-muted">&#64;{{ acc.username }} • {{ acc.email }}</div>
+                </div>
+              </div>
+              <div class="account-actions-row">
+                <button 
+                  *ngIf="acc.username !== 'admin'" 
+                  class="btn btn-sm btn-outline text-danger" 
+                  (click)="deleteUserAccount(acc.id)"
+                  title="ลบบัญชีนี้">
+                  🗑️ ลบบัญชี
+                </button>
+              </div>
+            </div>
+
+            <div class="account-card-body">
+              <div class="password-display-box">
+                <span class="pwd-label">🔑 รหัสผ่าน (Password):</span>
+                <span class="pwd-val font-mono">
+                  {{ showAccountPasswords[acc.id] ? acc.password : '••••••••' }}
+                </span>
+                <button type="button" class="btn-pwd-eye" (click)="toggleAccountPasswordReveal(acc.id)">
+                  {{ showAccountPasswords[acc.id] ? '🙈 ซ่อน' : '👁️ ดูรหัส' }}
+                </button>
+              </div>
+              <div class="account-created-at text-muted">
+                📅 ลงทะเบียนเมื่อ: {{ acc.created_at | date:'medium' }}
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 

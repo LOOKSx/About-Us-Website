@@ -19,6 +19,9 @@ func SetupRoutes() *http.ServeMux {
 	mux.HandleFunc("/api/v1/testimonials", handlers.TestimonialsHandler)
 	mux.HandleFunc("/api/v1/faqs", handlers.FAQsHandler)
 	mux.HandleFunc("/api/v1/contact", handlers.ContactHandler)
+	mux.HandleFunc("/api/v1/auth/login", handlers.LoginHandler)
+	mux.HandleFunc("/api/v1/auth/register", handlers.RegisterHandler)
+	mux.HandleFunc("/api/v1/auth/users", handlers.UsersListHandler)
 
 	return mux
 }
